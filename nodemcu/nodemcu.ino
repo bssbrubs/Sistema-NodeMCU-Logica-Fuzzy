@@ -1,13 +1,16 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
+#include <ESP8266HTTPClient.h>
 #include "DHT.h"
 
 // SSID e Password do Wi-Fi a qual o NodeMCU deve se comunicar
 const char ssid[] = "bssbrubs";
 const char psw[] = "andebubu2401";
 
+HTTPClient http;
+
 // Pagina web que receberá as informações via POST
-const char http_site[] = "http://192.168.43.8/Sistema-NodeMCU-Logica-Fuzzy";
+const char http_site[] = "http://192.168.43.8";
 const int http_port = 80;
 WiFiClient client;
 IPAddress server(192, 168, 43, 8); //Endereço IP do servidor - http_site
@@ -23,12 +26,15 @@ int lumin = 0;
 int temp = 0;
 int humid = 0;
 
+int valorSaida = 0;
+
 // DHT
 DHT dht(pinDHT, typeDHT);
 
 void setup() {
   delay(3000);
   Serial.begin(9600);
+  pinMode(pinLED, OUTPUT);
 
   // Conecta ao Wi-Fi
   WiFi.begin(ssid, psw);
@@ -82,10 +88,21 @@ void loop() {
     client.println();
 
     // Informações de retorno do servidor para debug
-    while (client.available()) {
-      String line = client.readStringUntil('\r');
-      Serial.print(line);
-      client.flush();
+
+    http.begin("http://192.168.43.8:80/Sistema-NodeMCU-Logica-Fuzzy/fuzzy_in_out.php");
+    int httpCode = http.GET();                                                                  //Send the request
+
+    if (httpCode > 0) { //Check the returning code
+      String payload = http.getString();   //Get the request response payload
+      Serial.println(payload);                     //Print the response payload
+      valorSaida = atoi( payload.c_str() );
+    }
+    http.end();   //Close connection
+
+    if (valorSaida > 36) {
+      digitalWrite(pinLED, HIGH);
+    } else {
+      digitalWrite(pinLED, LOW);
     }
   }
 

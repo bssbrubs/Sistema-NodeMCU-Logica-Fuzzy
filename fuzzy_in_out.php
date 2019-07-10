@@ -1,9 +1,15 @@
 <?php 
 
 // Recebe os parametros Luminosidade / Umidade / Temperatura do NodeMCU via Requisição GET
-$luminosidade = $_GET["temp"];
-$umidade = $_GET["humid"];
-$temperatura = $_GET["lumin"];
+if(isset($_GET['temp'])) {
+	$luminosidade = $_GET["temp"];
+	$umidade = $_GET["humid"];
+	$temperatura = $_GET["lumin"];
+} else {
+	$luminosidade = '';
+	$umidade = '';
+	$temperatura = '';
+}
 
 // $luminosidade = 26;
 // $umidade = 65;
