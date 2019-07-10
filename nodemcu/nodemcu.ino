@@ -7,16 +7,16 @@ const char ssid[] = "bssbrubs";
 const char psw[] = "andebubu2401";
 
 // Pagina web que receberá as informações via POST
-const char http_site[] = "http://localhost/nodemcu";
-const int http_port = 8080;
+const char http_site[] = "http://192.168.43.8/Sistema-NodeMCU-Logica-Fuzzy";
+const int http_port = 80;
 WiFiClient client;
-IPAddress server(192, 168, 0, 23); //Endereço IP do servidor - http_site
+IPAddress server(192, 168, 43, 8); //Endereço IP do servidor - http_site
 
 // Constantes de definição
-#define pinDHT 8
+#define pinDHT D2
 #define typeDHT DHT22
-#define pinLED D1;
-#define pinLDR A0;
+#define pinLED D1
+#define pinLDR A0
 
 // Variáveis globais
 int lumin = 0;
@@ -52,19 +52,8 @@ void loop() {
   // Lendo temperatura em Celsius  e convertendo valor pra int
   float t = dht.readTemperature();
   temp = (int) t;
-
-  if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println("Falha ao ler sensor DHT!");
-    return;
-  }
-
-  // Calculando indice de calor
-  float hic = dht.computeHeatIndex(t, h, false);
-
   // Lendo luminosidade
   lumin = analogRead(pinLDR);
-
-
 
   Serial.print("Umidade: ");
   Serial.print(h);
@@ -75,42 +64,30 @@ void loop() {
   Serial.print("Temperatura: ");
   Serial.print(t);
   Serial.print(" *C\t ");
-  Serial.print("Indice de Calor: ");
-  Serial.print(hic);
-  Serial.print(" *C ");
-
-
-  // Envio dos dados do sensor para o servidor via GET
-  if ( !getPage((int)temp, (int)humid, (int)lumin) ) {
-    Serial.println("GET request failed");
-  }
-  delay(5000);
-}
-
-// Executa o HTTP GET request na pagina web
-bool getPage(int temp, int humid, int lumin) {
+  Serial.println(" ");
 
   if ( !client.connect(server, http_port) ) {
     Serial.println("Falha na conexao com o site ");
-    return false;
-  }
 
-  String param = "?temp=" + String(temp) + "&humid=" + String(humid) + "&lumin=" + String(lumin); //Parâmetros com as leituras
-  Serial.println(param);
-  client.println("GET /nodemcu/fuzzy_in_out.php" + param + " HTTP/1.1");
-  client.println("Host: ");
-  client.println(http_site);
-  client.println("Connection: close");
-  client.println();
-  client.println();
+  } else {
+    Serial.println("Conectado ao site ");
+
+    String param = "?temp=" + String(temp) + "&humid=" + String(humid) + "&lumin=" + String(lumin); //Parâmetros com as leituras
+    Serial.println(param);
+    client.println("GET http://192.168.43.8:80/Sistema-NodeMCU-Logica-Fuzzy/fuzzy_in_out.php" + param + "HTTP/1.1");
+    client.println("Host: ");
+    client.println(http_site);
+    client.println("Connection: close");
+    client.println();
+    client.println();
+
+    // Informações de retorno do servidor para debug
+    while (client.available()) {
+      String line = client.readStringUntil('\r');
+      Serial.print(line);
+      client.flush();
+    }
+  }
 
   delay(5000);
-
-  // Informações de retorno do servidor para debug
-  while (client.available()) {
-    String line = client.readStringUntil('\r');
-    Serial.print("quantidade de agua: ");
-    Serial.print(line);
-  }
-  return true;
 }

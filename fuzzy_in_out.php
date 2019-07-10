@@ -5,8 +5,18 @@ $luminosidade = $_GET["temp"];
 $umidade = $_GET["humid"];
 $temperatura = $_GET["lumin"];
 
+// $luminosidade = 26;
+// $umidade = 65;
+// $temperatura = 32;
+
+$luminosidade = intval($luminosidade);
+$umidade = intval($umidade);
+$temperatura = intval($temperatura);
+
 // Executa o script em R, passando os parametros recebidos via GET
-$output = shell_exec("Rscript script.r $temperatura $umidade $luminosidade 2>&1");
+$output = exec('"C:\Program Files\R\R-3.5.3\bin\Rscript.exe" script.r '.$temperatura.' '.$umidade.' '.$luminosidade.' 2>&1');
+
+echo $output;
 
 $saida_fuzzy_txt = "saida.txt";
 $linha = '"x"';

@@ -1,5 +1,4 @@
-library(sets, lib.loc='/home/sedepti/R/x86_64-pc-linux-gnu-library/3.3')
-setwd('/var/www/nodemcu')
+library(sets)
 sets_options("universe", seq(1, 80, 0.5))
 
 args <- commandArgs(TRUE)
