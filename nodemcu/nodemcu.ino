@@ -33,7 +33,7 @@ DHT dht(pinDHT, typeDHT);
 
 void setup() {
   delay(3000);
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(pinLED, OUTPUT);
 
   // Conecta ao Wi-Fi
